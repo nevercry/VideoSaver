@@ -1,6 +1,6 @@
 {
   "name": "VideoSaver",
   "tagline": "iOS,download,mp4,safari-extension",
-  "body": "### Welcome to VideoSaver.\r\nVideoSaver is an iOS app that can download 'mp4' format video directly from Safari share extension, or you can save the link of video to the host app and download it later. The app contains custom player that can loop video, which is really useful for playing short video (like GIF). It supports background download, save video in both app cahce folder and user's Photo Library. \r\n\r\n### Authors \r\nYang Shengfu (@nevercry)\r\n\r\n### Support or Contact\r\nHaving trouble with VideoSaver? \r\nEmail: nsysfmac#gmail.com  \r\nTwitter: [nevercry](https://twitter.com/nevercry)\r\n\r\n",
+  "body": "### Welcome to VideoSaver.\r\nVideoSaver is an iOS app that can download 'mp4' format video directly from Safari share extension, or you can save the link of video to the host app and download it later. The app contains custom player that can loop video, which is really useful for playing short video (like GIF). It supports background download, save video in both app cahce folder and user's Photo Library. \r\n\r\n### Authors \r\nYang Shengfu (@nevercry)\r\n\r\n### Support or Contact\r\nHaving trouble with VideoSaver?   \r\nEmail: nsysfmac#gmail.com  \r\nTwitter: [nevercry](https://twitter.com/nevercry)\r\n\r\n",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
