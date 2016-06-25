@@ -12,21 +12,66 @@ import MobileCoreServices
 
 class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDownloadDelegate{
     
-    
-    
     @IBOutlet weak var progressView: UIProgressView!
     @IBOutlet weak var pinView: UIActivityIndicatorView!
     @IBOutlet weak var progressLabel: UILabel!
     @IBOutlet weak var downloadButton: UIButton!
+    @IBOutlet weak var linkLabel: UILabel!
+    @IBOutlet weak var saveLinkButton: UIBarButtonItem!
+    
+    // 计算剩余下载时间
+    var _lastDownloadDate: NSDate?
+    let SMOOTHING_FACTOR = 0.005
+    var _averageSpeed: Double?
+    var _progress: NSProgress?
+    var _myContext: Void?
+    
+    var videoInfo: [String: String] = [:]  // Keys: "url","type","poster","duration","title"，“source”
+    var userAction: ShareActions = .Save
+    
+    enum ShareActions: Int {
+        case Save,Download
+    }
     
     var isDownLoading = false {
         didSet {
             setupNetWorkingStats()
         }
     }
-    var videoURL: NSURL?
-    var pageUrl: NSString?
-    var videoType: NSString?
+    
+    func updateUI() {
+        isDownLoading = false
+        if let _ = videoInfo["url"] {
+            saveLinkButton.enabled = true
+            downloadButton.enabled = true
+        } else {
+            saveLinkButton.enabled = false
+            downloadButton.enabled = false
+        }
+    }
+    
+    // MARK: 显示没有URL的警告
+    func showNoURLAlert() {
+        let alertTitle = NSLocalizedString("Can't fetch video link", comment: "无法获取到视频地址")
+        let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: { (action) in
+            self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
+                self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
+            })
+            
+        })
+        showAlert(alertTitle, message: nil, actions: [cancelAction])
+    }
+    
+    // MARK: 显示警告
+    func showAlert(title:String?, message: String?, actions: [UIAlertAction])  {
+        let alC = UIAlertController.init(title: title, message: message, preferredStyle: .Alert)
+        for (_,action) in actions.enumerate() {
+            alC.addAction(action)
+        }
+        dispatch_async(dispatch_get_main_queue()) { 
+             self.presentViewController(alC, animated: true, completion: nil)
+        }
+    }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -38,103 +83,169 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        isDownLoading = false
-        if let item = extensionContext?.inputItems.first as? NSExtensionItem {
-            if let itemProvider = item.attachments?.first as? NSItemProvider {
-                let propertyList = String(kUTTypePropertyList)
-                if itemProvider.hasItemConformingToTypeIdentifier(propertyList) {
-                    itemProvider.loadItemForTypeIdentifier(propertyList, options: nil, completionHandler: { (diction, error) in
-                        if let shareDic = diction as? NSDictionary {
-                            if let results = shareDic.objectForKey(NSExtensionJavaScriptPreprocessingResultsKey) as? NSDictionary {
-                                self.pageUrl = results.objectForKey("url") as? NSString // 网站地址
-                                self.videoType = results.objectForKey("videoType") as? NSString // 视频类型
-                                print("url is \(self.pageUrl)，videoType is \(self.videoType)")
-                                
-                                let videoURLStr = results.objectForKey("videoURL") as? NSString // 视频地址
-                                if let _ = videoURLStr {
-                                    // 如果获取到视频地址
-                                    print("video url is \(videoURLStr!)")
-                                    if videoURLStr!.length > 0 {
-                                        self.videoURL = NSURL(string: videoURLStr! as String)
-                                        // 设置文件名
-                                        self.title = self.videoURL!.lastPathComponent!
-                                    }
-                                }
-                            }
-                        }
-                    })
-                }
-            }
-            print("分享内容是: \(item.attributedContentText?.string)")
-        }
+        updateUI()
+        pinView.stopAnimating()
+        
+        let propertyList = String(kUTTypePropertyList)
+        guard let item = extensionContext?.inputItems.first as? NSExtensionItem,
+            itemProvider = item.attachments?.first as? NSItemProvider where itemProvider.hasItemConformingToTypeIdentifier(propertyList)
+            else { return }
+        
+        itemProvider.loadItemForTypeIdentifier(propertyList, options: nil, completionHandler: { (diction, error) in
+            guard let shareDic = diction as? NSDictionary,
+                results = shareDic.objectForKey(NSExtensionJavaScriptPreprocessingResultsKey) as? NSDictionary,
+                vInfo = results.objectForKey("videoInfo") as? NSDictionary else { return }
+            
+            // 视频信息
+            self.videoInfo["title"] = vInfo["title"] as? String
+            self.videoInfo["duration"] = vInfo["duration"] as? String
+            self.videoInfo["poster"] = vInfo["poster"] as? String
+            self.videoInfo["url"] = vInfo["url"] as? String
+            self.videoInfo["type"] = vInfo["type"] as? String
+            self.videoInfo["source"] = vInfo["source"] as? String
+            
+            print("videoInfo is \(self.videoInfo)")
+            
+            guard let videoURLStr = self.videoInfo["url"] where videoURLStr.characters.count > 0 else { return }
+            // 视频地址
+            print("video url is \(videoURLStr)")
+            // 设置文件名
+            dispatch_async(dispatch_get_main_queue(), {
+                self.title = self.videoInfo["title"]
+                self.linkLabel.text = "\(NSLocalizedString("Link", comment: "链接")): \(videoURLStr)"
+                self.updateUI()
+            })
+        })
+       
+        print("分享内容是: \(item.attributedContentText?.string)")
     }
-    
+
     // MARK: - 添加到下载列表
     @IBAction func saveToDownLoadList(sender: UIBarButtonItem) {
-        
+        userAction = ShareActions.Save
         // 找不到shareUrl 提示用户无法使用插件
-        // 禁止用户下载
-        guard (self.videoURL != nil) else {
-            self.downloadButton.enabled = false
-            let alC = UIAlertController.init(title: "无法获取视频地址", message: "请先点击播放才能在浏览器中获得视频网址", preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
-                self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
-                    self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-                })
-                
-            })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+        guard (videoInfo["url"] != nil) else {
+            saveLinkButton.enabled = false
+            showNoURLAlert()
             return
         }
         
         // 解析一下是否是优酷的m3u8 文件
-        if (videoType == "m3u8") {
-            // dataTask;
-            let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-            config.timeoutIntervalForRequest = 10
-            let session = NSURLSession(configuration: config)
-            session.dataTaskWithRequest(NSURLRequest(URL: videoURL!), completionHandler: { (data, res, error) in
-                if ((data) != nil) {
-                    let dataInfo = String(data: data!, encoding: NSUTF8StringEncoding)
-                    print("dataInfo is \(dataInfo)")
-                    let scaner = NSScanner(string: dataInfo!)
-                    scaner.scanUpToString("http", intoString: nil)
-                    var video_url:NSString?
-                    scaner.scanUpToString(".ts", intoString: &video_url)
-                    print("videoURL is \(video_url)")
-                    if let _ = video_url {
-                        self.videoURL = NSURL(string: (video_url as? String)!)
-                        dispatch_async(dispatch_get_main_queue(), { 
-                            self.startSave()
-                            
-                        })
-                        return
-                    }
-                }
-                
-                let alC = UIAlertController.init(title: "无法保存", message: "保存失败", preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: nil)
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
-            }).resume()
+        if (videoInfo["type"] == "m3u8") {
+            parse_m3u8(userAction)
+        } else if (videoInfo["type"] == "xml") {
+            // 是否为twimg的xml文件
+            parseXML()
         } else {
             startSave()
         }
     }
     
-    func startSave() {
-        let newDownloadTask = ["fileName":fileNameFromURL(self.videoURL!),"url":self.videoURL!.absoluteString]
-        saveTask(newDownloadTask)
-        hideExtensionWithCompletionHandler { (Bool) -> Void in
-            self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-        }
+    // MARK: - 解析m3u8
+    func parse_m3u8(action: ShareActions)  {
+        isDownLoading = true
+        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+        config.timeoutIntervalForRequest = 10
+        let session = NSURLSession(configuration: config)
+        
+        let videoURL = NSURL(string: videoInfo["url"]!)
+        session.dataTaskWithRequest(NSURLRequest(URL: videoURL!), completionHandler: { (data, res, error) in
+           self.isDownLoading = false
+            
+            guard (data != nil) else {
+                let alertTitle = NSLocalizedString("Operation Failed", comment: "操作失败")
+                let message = NSLocalizedString("Try again", comment: "请重试")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: {
+                    action in
+                    self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
+                        self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
+                    })
+                })
+                self.showAlert(alertTitle, message: message, actions: [cancelAction])
+                return
+            }
+            
+            let dataInfo = String(data: data!, encoding: NSUTF8StringEncoding)
+            let scaner = NSScanner(string: dataInfo!)
+            scaner.scanUpToString("http", intoString: nil)
+            var firstUrl:NSString?
+            scaner.scanUpToString(".ts", intoString: &firstUrl)
+            // 备用地址
+            scaner.scanUpToString("keyframe=1", intoString: nil)
+            // 移到关键帧
+            scaner.scanUpToString("http", intoString: nil)
+            var video_url:NSString?
+            scaner.scanUpToString(".ts", intoString: &video_url)
+            print("videoURL is \(video_url)")
+            
+            if video_url == nil {
+                video_url = firstUrl
+            }
+            
+            guard (video_url != nil) && video_url!.hasSuffix("mp4") else {
+                let cancelAction = UIAlertAction(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: nil)
+                self.showAlert(NSLocalizedString("地址解析失败", comment: "地址解析失败"), message: nil, actions: [cancelAction])
+                return
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.videoInfo["url"] = video_url! as String
+                self.linkLabel.text = "\(NSLocalizedString("Link", comment: "链接")): \(video_url!)";
+                switch action {
+                case .Download:
+                    self.startDonload()
+                    break
+                case .Save:
+                    self.startSave()
+                }
+            })
+        }).resume()
     }
     
-    func loadTaskList() -> [[String:String]]? {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+    // MARK: - 解析xml
+    func parseXML()  {
+        isDownLoading = true
         
-        if let jsonData:NSData = groupDefaults.objectForKey("downloadTaskList") as? NSData {
+        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+        config.timeoutIntervalForRequest = 10
+        let session = NSURLSession(configuration: config)
+        let videoURL = NSURL(string: videoInfo["url"]!)
+        session.dataTaskWithRequest(NSURLRequest(URL: videoURL!), completionHandler: { (data, res, error) in
+            self.isDownLoading = false
+            guard (data != nil) else {
+                let alertTitle = NSLocalizedString("Operation Failed", comment: "操作失败")
+                let message = NSLocalizedString("Try again", comment: "请重试")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: {
+                    action in
+                    self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
+                        self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
+                    })
+                })
+                self.showAlert(alertTitle, message: message, actions: [cancelAction])
+                return
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                let xmlParser = NSXMLParser(data: data!)
+                xmlParser.delegate = self
+                if !xmlParser.parse() {
+                    let cancelAction = UIAlertAction(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: nil)
+                    self.showAlert(NSLocalizedString("地址解析失败", comment: "地址解析失败"), message: nil, actions: [cancelAction])
+                }
+            })
+        }).resume()
+    }
+    
+    
+    
+    func startSave() {
+        saveMark(videoInfo)
+    }
+    
+    func loadMarkList() -> [[String:String]]? {
+        let groupDefaults = NSUserDefaults.init(suiteName: "group.nevercry.videoMarks")!
+        
+        if let jsonData:NSData = groupDefaults.objectForKey("savedMarks") as? NSData {
             do {
                 guard let jsonArray:NSArray = try NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments) as? NSArray else { return nil}
                 return jsonArray as? [[String : String]]
@@ -146,86 +257,65 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         return nil
     }
     
-    func saveTask(task:[String:String]) {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+    func saveMark(mark:[String:String]) {
+        let groupDefaults = NSUserDefaults.init(suiteName: "group.nevercry.videoMarks")!
         
-        var taskList = loadTaskList()
+        var markList = loadMarkList()
         
-        if taskList != nil {
-            taskList!.append(task)
+        if markList != nil {
+            markList!.append(mark)
         } else {
-            taskList = [task]
+            markList = [mark]
         }
         
         do {
-            let jsonData = try NSJSONSerialization.dataWithJSONObject(taskList!, options: .PrettyPrinted)
-            groupDefaults.setObject(jsonData, forKey: "downloadTaskList")
+            let jsonData = try NSJSONSerialization.dataWithJSONObject(markList!, options: .PrettyPrinted)
+            groupDefaults.setObject(jsonData, forKey: "savedMarks")
             groupDefaults.synchronize()
         } catch {
             print("保存UserDefault出错")
+            let cancelAction = UIAlertAction(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: nil)
+            showAlert(NSLocalizedString("保存出错", comment: "保存出错"), message: nil, actions: [cancelAction])
+            return
+        }
+        
+        hideExtensionWithCompletionHandler { (Bool) -> Void in
+            self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
         }
     }
-
-    // MARK: - 保存视频
+    
+    // MARK: - 直接下载视频
     @IBAction func downloadVideo(sender: AnyObject) {
-        // 找不到shareUrl 提示用户无法使用插件
-        // 禁止用户下载
-        guard (self.videoURL != nil) else {
+        userAction = ShareActions.Download
+        guard (videoInfo["url"] != nil) else {
             self.downloadButton.enabled = false
-            let alC = UIAlertController.init(title: "无法获取视频地址", message: "请先点击播放才能在浏览器中获得视频网址", preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
-                self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
-                    self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-                })
-                
-            })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            showNoURLAlert()
             return
         }
         
         // 解析一下是否是优酷的m3u8 文件
-        if (videoType == "m3u8") {
-            // dataTask;
-            let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-            config.timeoutIntervalForRequest = 10
-            let session = NSURLSession(configuration: config)
-            session.dataTaskWithRequest(NSURLRequest(URL: videoURL!), completionHandler: { (data, res, error) in
-                if ((data) != nil) {
-                    let dataInfo = String(data: data!, encoding: NSUTF8StringEncoding)
-                    print("dataInfo is \(dataInfo)")
-                    let scaner = NSScanner(string: dataInfo!)
-                    scaner.scanUpToString("http", intoString: nil)
-                    var video_url:NSString?
-                    scaner.scanUpToString(".ts", intoString: &video_url)
-                    print("videoURL is \(video_url)")
-                    if let _ = video_url {
-                        self.videoURL = NSURL(string: (video_url as? String)!)
-                        self.startDonload()
-                        return
-                    }
-                }
-                
-                let alC = UIAlertController.init(title: "无法下载", message: "地址解析失败", preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: nil)
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
-            }).resume()
+        if (videoInfo["type"] == "m3u8") {
+            parse_m3u8(userAction)
         } else {
             startDonload()
         }
     }
     
     func startDonload() {
-        isDownLoading = true
-        // 初始化一个Session
-        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-        config.timeoutIntervalForRequest = 10
-        let urlSession = NSURLSession(configuration: config, delegate: self, delegateQueue: nil)
-        
-        // 首先下载视频文件到cache 里
-        print("start download url \(videoURL!)")
-        urlSession.downloadTaskWithURL(videoURL!).resume()
+        if let videoURL = NSURL(string: videoInfo["url"]!) {
+            isDownLoading = true
+            // 初始化一个Session
+            let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+            config.timeoutIntervalForRequest = 10
+            let urlSession = NSURLSession(configuration: config, delegate: self, delegateQueue: nil)
+            
+            // 首先下载视频文件到cache 里
+            print("start download url \(videoInfo["url"])")
+            _lastDownloadDate = NSDate()
+            urlSession.downloadTaskWithURL(videoURL).resume()
+        } else {
+            showNoURLAlert()
+        }
     }
     
     func video(videoPath: String?, didFinishSavingWithError error: NSError?, contextInfo info: UnsafeMutablePointer<Void>) {
@@ -256,7 +346,6 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     func setupNetWorkingStats() {
         dispatch_async(dispatch_get_main_queue()) { 
             self.progressView.hidden = !self.isDownLoading
-            //self.pinView.hidden = !isDownLoading
             if (self.isDownLoading) {
                 self.pinView.startAnimating()
             } else {
@@ -265,6 +354,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             
             self.progressLabel.hidden = !self.isDownLoading
             self.downloadButton.enabled = !self.isDownLoading
+            self.saveLinkButton.enabled = !self.isDownLoading
         }
     }
     
@@ -279,34 +369,45 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         isDownLoading = false
         if ((error) != nil) {
             print("error happened: \(error!)")
-            
             // 提示用户删除失败
-            let alC = UIAlertController.init(title: "文件下载出错", message: nil, preferredStyle: .Alert)
+            let alertTitle = "文件下载出错"
             let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
             })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
             
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
-        
     }
     
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        let fl_totalWr = Float(totalBytesWritten)
-        let fl_totalExpected = Float(totalBytesExpectedToWrite)
+        if (_progress == nil) {
+            _progress = NSProgress(totalUnitCount: totalBytesExpectedToWrite)
+            _progress?.kind = NSProgressKindFile
+            progressView.observedProgress = _progress
+        }
         
-        let progressValue = fl_totalWr/fl_totalExpected
-        let totalSize = NSByteCountFormatter.stringFromByteCount(totalBytesExpectedToWrite, countStyle: .Binary)
-
+        
         dispatch_async(dispatch_get_main_queue(), {
-            self.progressLabel.text = String(format: "%.1f%% of %@",  progressValue * 100, totalSize)
-            self.progressView.progress = progressValue
+            self.progressLabel.text = self._progress?.localizedAdditionalDescription
         })
         
-        print("progress is \(progressValue * 100) %")
+        let senconds = abs(_lastDownloadDate!.timeIntervalSinceDate(NSDate()))
+        _lastDownloadDate = NSDate()
+        
+        if (_averageSpeed == nil) {
+            _averageSpeed = Double(bytesWritten) / senconds
+        } else {
+            _averageSpeed = SMOOTHING_FACTOR * (Double(bytesWritten) / senconds) + (1 - SMOOTHING_FACTOR) * _averageSpeed!
+        }
+        
+        let remainingTime = NSTimeInterval((Double(totalBytesExpectedToWrite) - Double(totalBytesWritten)) / _averageSpeed!)
+        
+        
+        _progress?.setUserInfoObject(remainingTime, forKey: "NSProgressEstimatedTimeRemainingKey")
+        _progress?.completedUnitCount = totalBytesWritten
     }
     
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
+        _progress = nil
         isDownLoading = false
         
         // MARK: 下载视频
@@ -320,17 +421,15 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             } catch {
                 print("创建文件夹失败")
                 // 提示用户删除失败
-                let alC = UIAlertController.init(title: "创建文件夹失败", message: nil, preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+                let alerTitle = NSLocalizedString("创建文件夹失败", comment: "创建文件夹失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
                 })
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
+                showAlert(alerTitle, message: nil, actions: [cancelAction])
             }
         }
         
         
-        
-        let fileName = self.fileNameFromURL(self.videoURL!)
+        let fileName = self.fileNameFromURL(location)
         let tmpVideoUrl = videosDir.URLByAppendingPathComponent("\(fileName)", isDirectory: false)
 
         if NSFileManager.defaultManager().fileExistsAtPath(tmpVideoUrl.path!) {
@@ -338,11 +437,10 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
                 try NSFileManager.defaultManager().removeItemAtURL(tmpVideoUrl)
             } catch {
                 // 提示用户删除失败
-                let alC = UIAlertController.init(title: "文件读取失败", message: nil, preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+                let alerTitle = NSLocalizedString("文件读取失败", comment: "文件读取失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
                 })
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
+                showAlert(alerTitle, message: nil, actions: [cancelAction])
             }
         }
         
@@ -350,24 +448,21 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             try NSFileManager.defaultManager().moveItemAtURL(location, toURL: tmpVideoUrl)
         } catch {
             // 提示用户删除失败
-            let alC = UIAlertController.init(title: "文件保存失败", message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+            let alertTitle = NSLocalizedString("文件保存失败", comment: "文件保存失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
             })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
         
-
         let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
         if (bool) {
             UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(ShareViewController.video(_:didFinishSavingWithError:contextInfo:)), nil)
         } else {
             // 提示用户无法保存
-            let alC = UIAlertController.init(title: "保存失败", message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+            let alerTitle = NSLocalizedString("保存失败", comment: "保存失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
             })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            showAlert(alerTitle, message: nil, actions: [cancelAction])
         }
     }
     
@@ -378,13 +473,14 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             },completion: completion)
     }
     
-    
     // MARK: - 获取文件名
     func fileNameFromURL(videoURL: NSURL) -> String {
         var fileName = videoURL.lastPathComponent!
         
+        print("location's lastPathComponent is \(fileName)")
+        
         if fileName.hasPrefix("videoplayback") {
-            let urlComponents = self.pageUrl!.componentsSeparatedByString("=")
+            let urlComponents = videoInfo["source"]!.componentsSeparatedByString("=")
             let videoId = urlComponents.last
             fileName = videoId!
         }
@@ -395,5 +491,36 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         
         return fileName
     }
-
 }
+
+// MARK:- NSXMLParserDelegate
+extension ShareViewController: NSXMLParserDelegate {
+    func parser(parser: NSXMLParser, foundCDATA CDATABlock: NSData) {
+        let videoURL = String(data: CDATABlock, encoding: NSUTF8StringEncoding)
+        print("url is \(videoURL)")
+        
+        if let _ = videoURL {
+            self.videoInfo["url"] = videoURL!
+            dispatch_async(dispatch_get_main_queue(), { 
+                self.linkLabel.text = "\(NSLocalizedString("Link", comment: "链接")): \(videoURL!)";
+                if (self.userAction == ShareActions.Save) {
+                    self.startSave()
+                } else {
+                    self.startDonload()
+                }
+            })
+        }
+    }
+}
+
+//// MARK: - KVO
+//extension ShareViewController {
+//    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+//        if context == &_myContext {
+//            
+//            print("Description is \(_progress?.localizedAdditionalDescription)")
+//        } else {
+//            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+//        }
+//    }
+//}
