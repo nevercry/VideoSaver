@@ -26,6 +26,9 @@
                                 </constraints>
                                 <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="deviceRGB"/>
                                 <state key="normal" title="立即下载"/>
+                                <variation key="heightClass=compact-widthClass=regular" ambiguous="YES" misplaced="YES">
+                                    <rect key="frame" x="370" y="285" width="60" height="30"/>
+                                </variation>
                                 <connections>
                                     <action selector="downloadVideo:" destination="j1y-V4-xli" eventType="touchUpInside" id="KaN-zv-N3U"/>
                                 </connections>
@@ -49,16 +52,10 @@
                                 <rect key="frame" x="20" y="151" width="560" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="gCx-lq-5vb"/>
-                                    <constraint firstAttribute="width" constant="200" id="wnL-kd-0al"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <color key="textColor" red="0.4802543474" green="0.481250179" blue="0.54225122609999998" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="wnL-kd-0al"/>
-                                    </mask>
-                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fIz-8B-h69">
                                 <rect key="frame" x="20" y="232" width="560" height="21"/>
@@ -68,6 +65,9 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.4802543474" green="0.481250179" blue="0.54225122609999998" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact-widthClass=regular" ambiguous="YES" misplaced="YES">
+                                    <rect key="frame" x="20" y="232" width="760" height="21"/>
+                                </variation>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -77,13 +77,12 @@
                             <constraint firstItem="Mld-sj-nRD" firstAttribute="top" secondItem="fIz-8B-h69" secondAttribute="bottom" constant="32" id="Lka-Vh-M1T"/>
                             <constraint firstItem="GiU-11-i3g" firstAttribute="centerX" secondItem="wbc-yd-nQP" secondAttribute="centerX" id="e6R-mi-plF"/>
                             <constraint firstItem="MbV-qF-pj3" firstAttribute="top" secondItem="5u7-Hz-asq" secondAttribute="bottom" constant="8" id="g8D-w1-mVU"/>
-                            <constraint firstItem="Mld-sj-nRD" firstAttribute="centerY" secondItem="wbc-yd-nQP" secondAttribute="centerY" id="iBi-WE-ACW"/>
-                            <constraint firstItem="5u7-Hz-asq" firstAttribute="centerX" secondItem="wbc-yd-nQP" secondAttribute="centerX" id="ifL-qI-mOh"/>
                             <constraint firstItem="fIz-8B-h69" firstAttribute="leading" secondItem="wbc-yd-nQP" secondAttribute="leadingMargin" id="iiY-4f-tsG"/>
                             <constraint firstItem="5u7-Hz-asq" firstAttribute="trailing" secondItem="wbc-yd-nQP" secondAttribute="trailingMargin" id="jxY-kh-WWi"/>
                             <constraint firstItem="5u7-Hz-asq" firstAttribute="top" secondItem="GiU-11-i3g" secondAttribute="bottom" constant="20" id="k55-5C-RWJ"/>
                             <constraint firstItem="5u7-Hz-asq" firstAttribute="leading" secondItem="wbc-yd-nQP" secondAttribute="leadingMargin" id="uPV-tH-QyR"/>
                             <constraint firstItem="MbV-qF-pj3" firstAttribute="centerX" secondItem="wbc-yd-nQP" secondAttribute="centerX" id="yNW-Lu-I5r"/>
+                            <constraint firstItem="fIz-8B-h69" firstAttribute="top" secondItem="MbV-qF-pj3" secondAttribute="bottom" constant="32" id="zEA-yK-HJv"/>
                             <constraint firstItem="fIz-8B-h69" firstAttribute="trailing" secondItem="wbc-yd-nQP" secondAttribute="trailingMargin" id="zxC-CP-efY"/>
                         </constraints>
                     </view>

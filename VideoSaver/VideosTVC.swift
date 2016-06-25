@@ -97,13 +97,13 @@ class VideosTVC: UITableViewController {
         // 检查文件夹是否存在
         if fileManager.fileExistsAtPath(videosDir.path!) {
             
-            let resourceKeys = [NSURLNameKey, NSURLAddedToDirectoryDateKey, NSURLFileSizeKey]
+            let resourceKeys = [NSURLLocalizedNameKey, NSURLAddedToDirectoryDateKey, NSURLFileSizeKey]
             let directoryEnumerator = fileManager.enumeratorAtURL(videosDir, includingPropertiesForKeys: resourceKeys, options: [.SkipsHiddenFiles], errorHandler: nil)!
             
             for case let fileURL as NSURL in directoryEnumerator {
                 guard let resourceValues = try? fileURL.resourceValuesForKeys(resourceKeys),
                     let date = resourceValues[NSURLAddedToDirectoryDateKey] as? NSDate,
-                    let name = resourceValues[NSURLNameKey] as? String,
+                    let name = resourceValues[NSURLLocalizedNameKey] as? String,
                     let size = resourceValues[NSURLFileSizeKey] as? NSNumber
                     else {
                         continue

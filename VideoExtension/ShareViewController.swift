@@ -24,7 +24,6 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     let SMOOTHING_FACTOR = 0.005
     var _averageSpeed: Double?
     var _progress: NSProgress?
-    var _myContext: Void?
     
     var videoInfo: [String: String] = [:]  // Keys: "url","type","poster","duration","title"，“source”
     var userAction: ShareActions = .Save
@@ -54,9 +53,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     func showNoURLAlert() {
         let alertTitle = NSLocalizedString("Can't fetch video link", comment: "无法获取到视频地址")
         let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: { (action) in
-            self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
-                self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-            })
+            self.hideExtensionWithCompletionHandler()
             
         })
         showAlert(alertTitle, message: nil, actions: [cancelAction])
@@ -157,9 +154,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
                 let message = NSLocalizedString("Try again", comment: "请重试")
                 let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: {
                     action in
-                    self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
-                        self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-                    })
+                    self.hideExtensionWithCompletionHandler()
                 })
                 self.showAlert(alertTitle, message: message, actions: [cancelAction])
                 return
@@ -217,9 +212,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
                 let message = NSLocalizedString("Try again", comment: "请重试")
                 let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: {
                     action in
-                    self.hideExtensionWithCompletionHandler({ (Bool) -> Void in
-                        self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-                    })
+                    self.hideExtensionWithCompletionHandler()
                 })
                 self.showAlert(alertTitle, message: message, actions: [cancelAction])
                 return
@@ -279,9 +272,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             return
         }
         
-        hideExtensionWithCompletionHandler { (Bool) -> Void in
-            self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-        }
+        hideExtensionWithCompletionHandler()
     }
     
     // MARK: - 直接下载视频
@@ -321,9 +312,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     func video(videoPath: String?, didFinishSavingWithError error: NSError?, contextInfo info: UnsafeMutablePointer<Void>) {
         // your completion code handled here
         if (error == nil) {
-            hideExtensionWithCompletionHandler { (Bool) -> Void in
-                self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-            }
+            hideExtensionWithCompletionHandler()
         } else {
             // 提示用户保存失败
             let alC = UIAlertController.init(title: "保存失败", message: nil, preferredStyle: .Alert)
@@ -336,9 +325,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     // MARK: - 取消下载
     @IBAction func cancel(sender: UIBarButtonItem) {
-        hideExtensionWithCompletionHandler { (Bool) -> Void in
-            self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
-        }
+        hideExtensionWithCompletionHandler()
     }
     
     
@@ -358,15 +345,25 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         }
     }
     
+    // MARK: - 重置Progress相关变量
+    func resetProgress() {
+        _lastDownloadDate = nil
+        _averageSpeed = nil
+        _progress = nil
+    }
+    
     // MARK: - NSURLSessionDelegate
     
     func URLSession(session: NSURLSession, didBecomeInvalidWithError error: NSError?) {
         isDownLoading = false
         print("Session invalid")
+        resetProgress()
     }
     
     func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
+        print("didComplete!")
         isDownLoading = false
+        resetProgress()
         if ((error) != nil) {
             print("error happened: \(error!)")
             // 提示用户删除失败
@@ -382,6 +379,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         if (_progress == nil) {
             _progress = NSProgress(totalUnitCount: totalBytesExpectedToWrite)
             _progress?.kind = NSProgressKindFile
+            _progress?.setUserInfoObject(NSProgressFileOperationKindDownloading, forKey: "NSProgressFileOperationKindKey")
             progressView.observedProgress = _progress
         }
         
@@ -407,8 +405,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     }
     
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
-        _progress = nil
-        isDownLoading = false
+        
         
         // MARK: 下载视频
         let fileManager = NSFileManager.defaultManager()
@@ -428,10 +425,18 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             }
         }
         
+        // 去掉标题里面的换行符号
+        var tmpTitle = videoInfo["title"] ?? "unknow"
+        tmpTitle = tmpTitle.stringByReplacingOccurrencesOfString("\n", withString: "")
+        tmpTitle = tmpTitle.stringByTrimmingCharactersInSet(NSCharacterSet.newlineCharacterSet())
         
-        let fileName = self.fileNameFromURL(location)
-        let tmpVideoUrl = videosDir.URLByAppendingPathComponent("\(fileName)", isDirectory: false)
-
+        
+        let fileName = tmpTitle
+        
+        var tmpVideoUrl = videosDir.URLByAppendingPathComponent("\(fileName)", isDirectory: false)
+        
+        tmpVideoUrl = tmpVideoUrl.URLByAppendingPathExtension("mp4")
+        
         if NSFileManager.defaultManager().fileExistsAtPath(tmpVideoUrl.path!) {
             do {
                 try NSFileManager.defaultManager().removeItemAtURL(tmpVideoUrl)
@@ -454,6 +459,18 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
         
+        // 把文件的扩展名隐藏掉
+        do {
+            try tmpVideoUrl.setResourceValue(NSNumber.init(bool: true), forKey: NSURLHasHiddenExtensionKey)
+        } catch {
+            print("change extension hidden error")
+            let alertTitle = NSLocalizedString("修改文件失败", comment: "修改文件失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+            })
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
+        }
+        
+        
         let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
         if (bool) {
             UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(ShareViewController.video(_:didFinishSavingWithError:contextInfo:)), nil)
@@ -464,13 +481,21 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             })
             showAlert(alerTitle, message: nil, actions: [cancelAction])
         }
+        
+        isDownLoading = false
+        resetProgress()
     }
     
     // MARK: - 动画过渡
-    func hideExtensionWithCompletionHandler(completion:(Bool) -> Void) {
-        UIView.animateWithDuration(0.20, animations: { () -> Void in
-            self.navigationController!.view.transform = CGAffineTransformMakeTranslation(0, self.navigationController!.view.frame.size.height)
-            },completion: completion)
+    func hideExtensionWithCompletionHandler() {
+        dispatch_async(dispatch_get_main_queue()) { 
+            self.navigationItem.leftBarButtonItem?.enabled = false
+            UIView.animateWithDuration(0.20, animations: { () -> Void in
+                self.navigationController!.view.transform = CGAffineTransformMakeTranslation(0, self.navigationController!.view.frame.size.height)
+                },completion: { sucess in
+                    self.extensionContext?.completeRequestReturningItems(nil, completionHandler: nil)
+            })
+        }
     }
     
     // MARK: - 获取文件名
@@ -512,15 +537,3 @@ extension ShareViewController: NSXMLParserDelegate {
         }
     }
 }
-
-//// MARK: - KVO
-//extension ShareViewController {
-//    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-//        if context == &_myContext {
-//            
-//            print("Description is \(_progress?.localizedAdditionalDescription)")
-//        } else {
-//            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
-//        }
-//    }
-//}
