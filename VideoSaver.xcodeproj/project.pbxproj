@@ -84,6 +84,11 @@
 		4A80206D1CEC6811000A55B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		4A80206F1CEC6811000A55B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A8020771CEC6B11000A55B7 /* MyJSFile.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MyJSFile.js; sourceTree = "<group>"; };
+		4A8777051D20267E00BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		4A8777061D20267E00BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		4A8777071D20267E00BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/MainInterface.strings"; sourceTree = "<group>"; };
+		4A8777091D20269900BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		4A87770B1D2026A700BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -387,6 +392,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				4A8020491CEC677C000A55B7 /* Base */,
+				4A8777051D20267E00BB92C5 /* zh-Hans */,
+				4A87770B1D2026A700BB92C5 /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -395,6 +402,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				4A80204E1CEC677C000A55B7 /* Base */,
+				4A8777061D20267E00BB92C5 /* zh-Hans */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -403,6 +411,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				4A80206D1CEC6811000A55B7 /* Base */,
+				4A8777071D20267E00BB92C5 /* zh-Hans */,
+				4A8777091D20269900BB92C5 /* en */,
 			);
 			name = MainInterface.storyboard;
 			sourceTree = "<group>";

@@ -1,0 +1,48 @@
+
+/* Class = "UILabel"; text = "Subtitle"; ObjectID = "50R-80-EkL"; */
+"50R-80-EkL.text" = "Subtitle";
+
+/* Class = "UITableViewController"; title = "下载列表"; ObjectID = "5GX-iY-IcG"; */
+"5GX-iY-IcG.title" = "下载列表";
+
+/* Class = "UIBarButtonItem"; title = "下载列表"; ObjectID = "6up-U6-t4o"; */
+"6up-U6-t4o.title" = "下载列表";
+
+/* Class = "UIButton"; normalTitle = "Download"; ObjectID = "Jap-Sg-Svh"; */
+"Jap-Sg-Svh.normalTitle" = "下载";
+
+/* Class = "UILabel"; text = "Duration:"; ObjectID = "KaG-Uo-R5v"; */
+"KaG-Uo-R5v.text" = "Duration:";
+
+/* Class = "UILabel"; text = "Title"; ObjectID = "NO7-hK-2zh"; */
+"NO7-hK-2zh.text" = "Title";
+
+/* Class = "UIButton"; normalTitle = "Pause"; ObjectID = "Vc9-40-KsP"; */
+"Vc9-40-KsP.normalTitle" = "暂停";
+
+/* Class = "UILabel"; text = "Title"; ObjectID = "Xga-W1-vZm"; */
+"Xga-W1-vZm.text" = "Title";
+
+/* Class = "UINavigationItem"; title = "Setting"; ObjectID = "Xm1-tx-EUP"; */
+"Xm1-tx-EUP.title" = "设置";
+
+/* Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "bge-Iv-ODW"; */
+"bge-Iv-ODW.normalTitle" = "取消";
+
+/* Class = "UIBarButtonItem"; title = "Setting"; ObjectID = "ciG-jD-jYm"; */
+"ciG-jD-jYm.title" = "设置";
+
+/* Class = "UILabel"; text = "下载完成后保存到相册"; ObjectID = "dxs-7W-JAy"; */
+"dxs-7W-JAy.text" = "下载完成后保存到相册";
+
+/* Class = "UILabel"; text = "100% of 1.35MB"; ObjectID = "e50-1c-Y28"; */
+"e50-1c-Y28.text" = "100% of 1.35MB";
+
+/* Class = "UINavigationItem"; title = "缓存文件"; ObjectID = "eIC-2C-JJb"; */
+"eIC-2C-JJb.title" = "缓存文件";
+
+/* Class = "UILabel"; text = "Source:"; ObjectID = "fwr-qi-9eg"; */
+"fwr-qi-9eg.text" = "Source:";
+
+/* Class = "UINavigationItem"; title = "下载列表"; ObjectID = "psH-iS-3IA"; */
+"psH-iS-3IA.title" = "下载列表";
