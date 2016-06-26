@@ -1,0 +1,8 @@
+/* 
+  InfoPlist.strings
+  VideoSaver
+
+  Created by nevercry on 16/6/26.
+  Copyright © 2016年 nevercry. All rights reserved.
+*/
+CFBundleDisplayName = "保存视频";
