@@ -21,10 +21,18 @@ class VideosTVC: UITableViewController {
     var videos: [Video] = []
     let fileManager = NSFileManager.defaultManager()
     let avPlayer = AVPlayerViewController()
+    var isInPiP = false
     
+    // 活动指示器
+    var pinView: UIActivityIndicatorView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        //注册视频播放器播放完成同志
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(rePlay), name: AVPlayerItemDidPlayToEndTimeNotification, object: nil)
+        
+        
+        try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
         self.clearsSelectionOnViewWillAppear = true
         
         refreshControl?.addTarget(self, action: #selector(refresh), forControlEvents: .ValueChanged)
@@ -36,8 +44,20 @@ class VideosTVC: UITableViewController {
         // 通过FileManager 获取文件夹内的视频信息
         loadVideosInfo()
         
-        //注册视频播放器播放完成同志
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(rePlay), name: AVPlayerItemDidPlayToEndTimeNotification, object: nil)
+       
+    }
+    
+    func testNew()  {
+        print("test New!!!")
+    }
+    
+    func updateForPiP()  {
+        print("new ass!")
+        if let _ = presentedViewController {
+            if isInPiP {
+                dismissViewControllerAnimated(true, completion: nil)
+            }
+        }
     }
     
         
@@ -69,6 +89,8 @@ class VideosTVC: UITableViewController {
     // MARK: - 清空缓存
     @IBAction func clearCache(sender: AnyObject) {
         let alVC = UIAlertController.init(title: "是否清空缓存？", message: nil, preferredStyle: .ActionSheet)
+        alVC.modalPresentationStyle = .Popover
+        
         let cancelAction = UIAlertAction.init(title: "取消", style: .Cancel, handler: nil)
         let clearAction = UIAlertAction.init(title: "清空", style: .Destructive) { (action) in
             let groupDir = self.fileManager.containerURLForSecurityApplicationGroupIdentifier("group.com.nevercry.videosaver")!
@@ -86,6 +108,10 @@ class VideosTVC: UITableViewController {
         }
         alVC.addAction(cancelAction)
         alVC.addAction(clearAction)
+        
+        if let presenter = alVC.popoverPresentationController {
+            presenter.barButtonItem = sender as? UIBarButtonItem
+        }        
         presentViewController(alVC, animated: true, completion: nil)
     }
     
@@ -124,6 +150,7 @@ class VideosTVC: UITableViewController {
         
         presentViewController(avPlayer, animated: true) {
             self.avPlayer.player?.play()
+            self.updateForPiP()
         }
     }
 
@@ -182,31 +209,49 @@ class VideosTVC: UITableViewController {
         return true
     }
     
-
-    
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            let video = videos[indexPath.row]
-            if fileManager.fileExistsAtPath(video.path) {
+    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+        let deleteAction = UITableViewRowAction.init(style: UITableViewRowActionStyle.Destructive, title: NSLocalizedString("Delete", comment: "删除")) { (action, indexPath) in
+            let video = self.videos[indexPath.row]
+            if self.fileManager.fileExistsAtPath(video.path) {
                 do {
-                    try fileManager.removeItemAtPath(video.path)
-                    videos.removeAtIndex(indexPath.row)
+                    try self.fileManager.removeItemAtPath(video.path)
+                    self.videos.removeAtIndex(indexPath.row)
                     tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
                 } catch {
-                    let alVC = UIAlertController(title: "删除失败", message: nil, preferredStyle: .Alert)
-                    let cancelAction = UIAlertAction(title: "确认", style: .Cancel, handler: nil)
+                    let alVC = UIAlertController(title: NSLocalizedString("删除失败", comment: "删除失败"), message: nil, preferredStyle: .Alert)
+                    let cancelAction = UIAlertAction(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: nil)
                     alVC.addAction(cancelAction)
-                    presentViewController(alVC, animated: true, completion: { 
+                    self.presentViewController(alVC, animated: true, completion: {
                         self.tableView.endEditing(true)
                     })
                 }
             }
         }
-    }
-    
-    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
-        return .Delete
+        
+        let saveToAblumAction = UITableViewRowAction(style: .Normal, title: NSLocalizedString("保存", comment: "保存")) { (action, indexPath) in
+            let video = self.videos[indexPath.row]
+            
+            let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((video.path))
+            if (bool) {
+                self.pinView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+                self.pinView?.center = self.view.center
+                self.pinView?.hidesWhenStopped = true
+                self.pinView?.startAnimating()
+                self.navigationController?.view.addSubview(self.pinView!)
+                UISaveVideoAtPathToSavedPhotosAlbum(video.path, self, #selector(VideosTVC.video(_:didFinishSavingWithError:contextInfo:)), nil)
+            } else {
+                // 提示用户无法保存
+                let alerTitle = NSLocalizedString("保存失败", comment: "保存失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+                })
+                self.showAlert(alerTitle, message: nil, actions: [cancelAction])
+            }
+        }
+        
+        saveToAblumAction.backgroundColor = UIColor.grayColor()
+        
+        
+        return [deleteAction,saveToAblumAction]
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -248,10 +293,55 @@ class VideosTVC: UITableViewController {
 
 extension VideosTVC: AVPlayerViewControllerDelegate {
     
+    func playerViewControllerShouldAutomaticallyDismissAtPictureInPictureStart(playerViewController: AVPlayerViewController) -> Bool {
+        print("playerViewControllerShouldAutomaticallyDismissAtPictureInPictureStart")
+        return true
+    }
+    
+    func playerViewController(playerViewController: AVPlayerViewController, restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: (Bool) -> Void) {
+        print("restoreUserInterfaceForPictureInPictureStopWithCompletionHandler")
+        if let _ = self.presentedViewController {
+            
+        } else {
+            presentViewController(playerViewController, animated: true, completion: nil)
+        }
+        
+        completionHandler(true)
+    }
+    
+    func playerViewControllerWillStartPictureInPicture(playerViewController: AVPlayerViewController) {
+        print("WillStartPictureInPicture(")
+    }
+    
+    func playerViewControllerDidStartPictureInPicture(playerViewController: AVPlayerViewController) {
+        print("DidStartPictureInPicture")
+        isInPiP = true
+    }
+    
+    func playerViewControllerWillStopPictureInPicture(playerViewController: AVPlayerViewController) {
+        print("WillStopPictureInP")
+        isInPiP = false
+    }
+    
+    func playerViewControllerDidStopPictureInPicture(playerViewController: AVPlayerViewController) {
+        print("DidStopPictureInP")
+    }
 }
 
-
-
-
-
-
+extension VideosTVC {
+    func video(videoPath: String?, didFinishSavingWithError error: NSError?, contextInfo info: UnsafeMutablePointer<Void>) {
+        // your completion code handled here
+        self.pinView?.stopAnimating()
+        self.pinView?.removeFromSuperview()
+        self.pinView = nil
+        var alTitle = NSLocalizedString("保存成功", comment: "保存成功")
+        if (error != nil) {
+            // 提示用户保存失败
+            alTitle = NSLocalizedString("保存失败", comment: "保存失败")
+        }
+        let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+        })
+        
+        showAlert(alTitle, message: nil, actions: [cancelAction])
+    }
+}
