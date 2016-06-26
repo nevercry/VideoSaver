@@ -130,7 +130,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     // MARK: - 解析m3u8
     func parse_m3u8(action: ShareActions)  {
-        isDownLoading = true
+        self.pinView.startAnimating()
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
         config.timeoutIntervalForRequest = 10
         let session = NSURLSession(configuration: config)
@@ -189,7 +189,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     // MARK: - 解析xml
     func parseXML()  {
-        isDownLoading = true
+        pinView.startAnimating()
         
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
         config.timeoutIntervalForRequest = 10
