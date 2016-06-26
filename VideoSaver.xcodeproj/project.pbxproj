@@ -27,7 +27,6 @@
 		4A8020781CEC6B11000A55B7 /* MyJSFile.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A8020771CEC6B11000A55B7 /* MyJSFile.js */; };
 		4A87770E1D20298E00BB92C5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A87770C1D20298E00BB92C5 /* Localizable.strings */; };
 		4A8777131D202A9E00BB92C5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A8777111D202A9E00BB92C5 /* Localizable.strings */; };
-		4A8777181D202D8600BB92C5 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4A8777171D202D8600BB92C5 /* Info.plist */; };
 		4A87771D1D202FA700BB92C5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A87771F1D202FA700BB92C5 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -333,7 +332,6 @@
 				4A80204F1CEC677C000A55B7 /* LaunchScreen.storyboard in Resources */,
 				4A87770E1D20298E00BB92C5 /* Localizable.strings in Resources */,
 				4A80204C1CEC677C000A55B7 /* Assets.xcassets in Resources */,
-				4A8777181D202D8600BB92C5 /* Info.plist in Resources */,
 				4A80204A1CEC677C000A55B7 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

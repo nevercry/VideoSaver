@@ -173,7 +173,7 @@ class DownloadsTVC: UITableViewController {
         cell.durationLabel.text = task.duration
         cell.sourceLabel.text = task.source
         
-        let title = (task.isDownloading) ? "Pause" : "Resume"
+        let title = (task.isDownloading) ? NSLocalizedString("Pause", comment: "暂停") : NSLocalizedString("Resume", comment: "继续")
         cell.pauseButton.setTitle(title, forState: UIControlState.Normal)
         
         var showDownloadControls = false
@@ -181,7 +181,7 @@ class DownloadsTVC: UITableViewController {
             showDownloadControls = true
             
             cell.progressView.progress = download.progress
-            cell.progressLabel.text = (download.isDownloading) ? "Downloading..." : "Paused"
+            cell.progressLabel.text = (download.isDownloading) ? NSLocalizedString("Downloading...", comment: "下载中...") : NSLocalizedString("Pause", comment: "暂停")
         }
         
         cell.downloadButton.hidden = showDownloadControls

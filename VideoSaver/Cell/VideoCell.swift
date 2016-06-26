@@ -31,7 +31,7 @@ class VideoCell: UITableViewCell {
     @IBOutlet weak var sourceLabel: UILabel!
     
     @IBAction func pauseOrResumeTapped(sender: AnyObject) {
-        if(pauseButton.titleLabel!.text == "Pause") {
+        if(pauseButton.titleLabel!.text == NSLocalizedString("Pause", comment: "暂停")) {
             delegate?.pauseTapped(self)
         } else {
             delegate?.resumeTapped(self)
