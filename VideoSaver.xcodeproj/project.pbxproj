@@ -25,6 +25,8 @@
 		4A80206E1CEC6811000A55B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A80206C1CEC6811000A55B7 /* MainInterface.storyboard */; };
 		4A8020721CEC6811000A55B7 /* VideoExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4A8020681CEC6811000A55B7 /* VideoExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4A8020781CEC6B11000A55B7 /* MyJSFile.js in Resources */ = {isa = PBXBuildFile; fileRef = 4A8020771CEC6B11000A55B7 /* MyJSFile.js */; };
+		4A87770E1D20298E00BB92C5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A87770C1D20298E00BB92C5 /* Localizable.strings */; };
+		4A8777131D202A9E00BB92C5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A8777111D202A9E00BB92C5 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +91,10 @@
 		4A8777071D20267E00BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/MainInterface.strings"; sourceTree = "<group>"; };
 		4A8777091D20269900BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/MainInterface.strings; sourceTree = "<group>"; };
 		4A87770B1D2026A700BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		4A87770D1D20298E00BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = VideoSaver/en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4A87770F1D20299500BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "VideoSaver/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		4A8777121D202A9E00BB92C5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4A8777141D202AA100BB92C5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +144,7 @@
 		4A8020381CEC677B000A55B7 = {
 			isa = PBXGroup;
 			children = (
+				4A87770C1D20298E00BB92C5 /* Localizable.strings */,
 				4A6144C51CF8413300B6D6CB /* AVFoundation.framework */,
 				4A6144C31CF8412600B6D6CB /* AVKit.framework */,
 				4A8020431CEC677C000A55B7 /* VideoSaver */,
@@ -188,6 +195,7 @@
 		4A8020691CEC6811000A55B7 /* VideoExtension */ = {
 			isa = PBXGroup;
 			children = (
+				4A8777111D202A9E00BB92C5 /* Localizable.strings */,
 				4A6144C01CF47EB400B6D6CB /* VideoExtension.entitlements */,
 				4A8020771CEC6B11000A55B7 /* MyJSFile.js */,
 				4A80206A1CEC6811000A55B7 /* ShareViewController.swift */,
@@ -298,6 +306,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 4A8020381CEC677B000A55B7;
 			productRefGroup = 4A8020421CEC677B000A55B7 /* Products */;
@@ -317,6 +326,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A80204F1CEC677C000A55B7 /* LaunchScreen.storyboard in Resources */,
+				4A87770E1D20298E00BB92C5 /* Localizable.strings in Resources */,
 				4A80204C1CEC677C000A55B7 /* Assets.xcassets in Resources */,
 				4A80204A1CEC677C000A55B7 /* Main.storyboard in Resources */,
 			);
@@ -334,6 +344,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A80206E1CEC6811000A55B7 /* MainInterface.storyboard in Resources */,
+				4A8777131D202A9E00BB92C5 /* Localizable.strings in Resources */,
 				4A8020781CEC6B11000A55B7 /* MyJSFile.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,6 +426,24 @@
 				4A8777091D20269900BB92C5 /* en */,
 			);
 			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+		4A87770C1D20298E00BB92C5 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4A87770D1D20298E00BB92C5 /* en */,
+				4A87770F1D20299500BB92C5 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		4A8777111D202A9E00BB92C5 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4A8777121D202A9E00BB92C5 /* en */,
+				4A8777141D202AA100BB92C5 /* zh-Hans */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
