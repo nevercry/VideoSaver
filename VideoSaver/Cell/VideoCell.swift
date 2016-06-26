@@ -26,6 +26,10 @@ class VideoCell: UITableViewCell {
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var downloadButton: UIButton!
     
+    @IBOutlet weak var imageV: UIImageView!
+    @IBOutlet weak var durationLabel: UILabel!
+    @IBOutlet weak var sourceLabel: UILabel!
+    
     @IBAction func pauseOrResumeTapped(sender: AnyObject) {
         if(pauseButton.titleLabel!.text == "Pause") {
             delegate?.pauseTapped(self)

@@ -34,21 +34,11 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     var isDownLoading = false {
         didSet {
-            setupNetWorkingStats()
+            updateUI()
         }
     }
     
-    func updateUI() {
-        isDownLoading = false
-        if let _ = videoInfo["url"] {
-            saveLinkButton.enabled = true
-            downloadButton.enabled = true
-        } else {
-            saveLinkButton.enabled = false
-            downloadButton.enabled = false
-        }
-    }
-    
+
     // MARK: 显示没有URL的警告
     func showNoURLAlert() {
         let alertTitle = NSLocalizedString("Can't fetch video link", comment: "无法获取到视频地址")
@@ -236,9 +226,9 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     }
     
     func loadMarkList() -> [[String:String]]? {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.nevercry.videoMarks")!
+        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
         
-        if let jsonData:NSData = groupDefaults.objectForKey("savedMarks") as? NSData {
+        if let jsonData:NSData = groupDefaults.objectForKey("downloadTaskList") as? NSData {
             do {
                 guard let jsonArray:NSArray = try NSJSONSerialization.JSONObjectWithData(jsonData, options: .AllowFragments) as? NSArray else { return nil}
                 return jsonArray as? [[String : String]]
@@ -251,7 +241,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     }
     
     func saveMark(mark:[String:String]) {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.nevercry.videoMarks")!
+        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
         
         var markList = loadMarkList()
         
@@ -263,7 +253,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         
         do {
             let jsonData = try NSJSONSerialization.dataWithJSONObject(markList!, options: .PrettyPrinted)
-            groupDefaults.setObject(jsonData, forKey: "savedMarks")
+            groupDefaults.setObject(jsonData, forKey: "downloadTaskList")
             groupDefaults.synchronize()
         } catch {
             print("保存UserDefault出错")
@@ -330,7 +320,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     
     
     // MARK: - 设置网络请求状态
-    func setupNetWorkingStats() {
+    func updateUI() {
         dispatch_async(dispatch_get_main_queue()) { 
             self.progressView.hidden = !self.isDownLoading
             if (self.isDownLoading) {
@@ -342,6 +332,11 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             self.progressLabel.hidden = !self.isDownLoading
             self.downloadButton.enabled = !self.isDownLoading
             self.saveLinkButton.enabled = !self.isDownLoading
+            
+            if self.videoInfo["url"] == nil {
+                self.saveLinkButton.enabled = false
+                self.downloadButton.enabled = false
+            }
         }
     }
     
@@ -470,16 +465,31 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
         
+        // 检查是否需要保存到相册
+        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
         
-        let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
-        if (bool) {
-            UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(ShareViewController.video(_:didFinishSavingWithError:contextInfo:)), nil)
+        if userDefault.objectForKey("isSaveToPhoteAblum") == nil {
+            userDefault.setObject(NSNumber(bool: true), forKey: "isSaveToPhoteAblum")
+            if !userDefault.synchronize() {
+                print("error save user default")
+            }
+        }
+        
+        let isSaveToPhotoAblum =  userDefault.objectForKey("isSaveToPhoteAblum")! as! NSNumber
+        
+        if isSaveToPhotoAblum.boolValue == true {
+            let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
+            if (bool) {
+                UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(ShareViewController.video(_:didFinishSavingWithError:contextInfo:)), nil)
+            } else {
+                // 提示用户无法保存
+                let alerTitle = NSLocalizedString("保存失败", comment: "保存失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+                })
+                showAlert(alerTitle, message: nil, actions: [cancelAction])
+            }
         } else {
-            // 提示用户无法保存
-            let alerTitle = NSLocalizedString("保存失败", comment: "保存失败")
-            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
-            })
-            showAlert(alerTitle, message: nil, actions: [cancelAction])
+            video(nil, didFinishSavingWithError: nil, contextInfo: nil)
         }
         
         isDownLoading = false

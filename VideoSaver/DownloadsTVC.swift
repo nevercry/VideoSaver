@@ -115,7 +115,7 @@ class DownloadsTVC: UITableViewController {
         let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
         var arr = Array<[String:String]>()
         for item in downloadTasks {
-            let dic = ["fileName":item.fileName,"url":item.url]
+            let dic = ["title":item.title,"url":item.url,"poster":item.poster,"duration":item.duration]
             arr.append(dic)
         }
         
@@ -136,7 +136,7 @@ class DownloadsTVC: UITableViewController {
         
         if let taskList = loadTaskList() {
             for item in taskList {
-                let download = Download(url: item["url"]!,fileName: item["fileName"]!)
+                let download = Download(videoInfo: item)
                 downloadTasks.append(download)
             }
         }
@@ -167,9 +167,11 @@ class DownloadsTVC: UITableViewController {
         cell.delegate = self
         
         let task = downloadTasks[indexPath.row]
-        let videoName = task.fileName
+        let videoName = task.title
 
         cell.titleLabel.text = videoName
+        cell.durationLabel.text = task.duration
+        cell.sourceLabel.text = task.source
         
         let title = (task.isDownloading) ? "Pause" : "Resume"
         cell.pauseButton.setTitle(title, forState: UIControlState.Normal)
@@ -191,13 +193,32 @@ class DownloadsTVC: UITableViewController {
         cell.cancelButton.hidden = !showDownloadControls
         
         // Configure the cell...
-
+        if let image = task.image {
+            cell.imageV.image = image
+        } else {
+            cell.imageV.image = UIImage.alphaSafariIcon(60, scale: Float(UIScreen.mainScreen().scale))
+            if !task.poster.isEmpty {
+                let backUpIndex = indexPath
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) {
+                    let posterURL = NSURL(string: task.poster)!
+                    if let imageData = NSData(contentsOfURL: posterURL) {
+                        dispatch_async(dispatch_get_main_queue(), {
+                            if backUpIndex == indexPath {
+                                task.image = UIImage(data: imageData)
+                                cell.imageV.image = task.image
+                            }
+                        })
+                    }
+                }
+            }
+        }
+        
         return cell
     }
     
     // MARK: - TableView Delegate
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 62.0
+        return 77.0
     }
     
     
@@ -228,11 +249,10 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
         // your completion code handled here
         if (error != nil) {
             // 提示用户保存失败
-            let alC = UIAlertController.init(title: "保存失败", message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+            let alertTitle = NSLocalizedString("保存失败", comment: "保存失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
             })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
     }
     
@@ -247,11 +267,11 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
             } catch {
                 print("创建文件夹失败")
                 // 提示用户删除失败
-                let alC = UIAlertController.init(title: "创建文件夹失败", message: nil, preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+                let alerTitle = NSLocalizedString("创建文件夹失败", comment: "创建文件夹失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
                 })
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
+                
+                showAlert(alerTitle, message: nil, actions: [cancelAction])
             }
         }
         
@@ -259,23 +279,29 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
         var fileName = ""
         for elem in taskList {
             if elem["url"] ==  downloadTask.originalRequest!.URL!.absoluteString {
-                fileName = elem["fileName"]!
+                // 去掉标题里面的换行符号
+                var tmpTitle = elem["title"] ?? "unknow"
+                tmpTitle = tmpTitle.stringByReplacingOccurrencesOfString("\n", withString: "")
+                tmpTitle = tmpTitle.stringByTrimmingCharactersInSet(NSCharacterSet.newlineCharacterSet())
+                fileName = tmpTitle
                 break
             }
         }
         
-        let tmpVideoUrl = videosDir.URLByAppendingPathComponent("\(fileName)", isDirectory: false)
+        var tmpVideoUrl = videosDir.URLByAppendingPathComponent("\(fileName)", isDirectory: false)
+        
+        tmpVideoUrl = tmpVideoUrl.URLByAppendingPathExtension("mp4")
+        
         
         if NSFileManager.defaultManager().fileExistsAtPath(tmpVideoUrl.path!) {
             do {
                 try NSFileManager.defaultManager().removeItemAtURL(tmpVideoUrl)
             } catch {
                 // 提示用户删除失败
-                let alC = UIAlertController.init(title: "文件读取失败", message: nil, preferredStyle: .Alert)
-                let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+                let alertTitle = NSLocalizedString("文件读取失败", comment: "文件读取失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
                 })
-                alC.addAction(cancelAction)
-                self.presentViewController(alC, animated: true, completion: nil)
+                showAlert(alertTitle, message: nil, actions: [cancelAction])
             }
         }
         
@@ -283,26 +309,52 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
             try NSFileManager.defaultManager().moveItemAtURL(location, toURL: tmpVideoUrl)
         } catch {
             // 提示用户删除失败
-            let alC = UIAlertController.init(title: "文件保存失败", message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
+            let alertTitle = NSLocalizedString("文件保存失败", comment: "文件保存失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
             })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
+        }
+        
+        // 把文件的扩展名隐藏掉
+        do {
+            try tmpVideoUrl.setResourceValue(NSNumber.init(bool: true), forKey: NSURLHasHiddenExtensionKey)
+        } catch {
+            print("change extension hidden error")
+            let alertTitle = NSLocalizedString("修改文件失败", comment: "修改文件失败")
+            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+            })
+            showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
         
         
-        let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
-        if (bool) {
-            UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(video(_:didFinishSavingWithError:contextInfo:)), nil)
+        // 检查是否需要保存到相册
+        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
+        
+        
+        
+        if userDefault.objectForKey("isSaveToPhoteAblum") == nil {
+            userDefault.setObject(NSNumber(bool: true), forKey: "isSaveToPhoteAblum")
+            if !userDefault.synchronize() {
+                print("error save userdefault")
+            }
+        }
+        
+        let isSaveToPhotoAblum =  userDefault.objectForKey("isSaveToPhoteAblum")! as! NSNumber
+        
+        if isSaveToPhotoAblum.boolValue == true {
+            let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((tmpVideoUrl.path)!)
+            if (bool) {
+                UISaveVideoAtPathToSavedPhotosAlbum(tmpVideoUrl.path!, self, #selector(video(_:didFinishSavingWithError:contextInfo:)), nil)
+            } else {
+                // 提示用户无法保存
+                let alerTitle = NSLocalizedString("保存失败", comment: "保存失败")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+                })
+                showAlert(alerTitle, message: nil, actions: [cancelAction])
+            }
         } else {
-            // 提示用户无法保存
-            let alC = UIAlertController.init(title: "保存失败", message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction.init(title: "确认", style: .Cancel, handler: { (action) in
-            })
-            alC.addAction(cancelAction)
-            self.presentViewController(alC, animated: true, completion: nil)
+            video(nil, didFinishSavingWithError: nil, contextInfo: nil)
         }
-        
         
 
         if let index = taskIndex(downloadTask) {

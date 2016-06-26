@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A43F7691D200A7000CE4DDE /* SettingTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A43F7681D200A7000CE4DDE /* SettingTVC.swift */; };
 		4A6144BC1CF3FDE000B6D6CB /* VideosTVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6144BB1CF3FDE000B6D6CB /* VideosTVC.swift */; };
 		4A6144BE1CF43C3600B6D6CB /* Video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A6144BD1CF43C3600B6D6CB /* Video.swift */; };
 		4A6144C41CF8412600B6D6CB /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A6144C31CF8412600B6D6CB /* AVKit.framework */; };
@@ -58,6 +59,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4A43F7681D200A7000CE4DDE /* SettingTVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingTVC.swift; sourceTree = "<group>"; };
 		4A6144BB1CF3FDE000B6D6CB /* VideosTVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideosTVC.swift; sourceTree = "<group>"; };
 		4A6144BD1CF43C3600B6D6CB /* Video.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Video.swift; path = "Data Objects/Video.swift"; sourceTree = "<group>"; };
 		4A6144BF1CF47E9F00B6D6CB /* VideoSaver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = VideoSaver.entitlements; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				4A6144BF1CF47E9F00B6D6CB /* VideoSaver.entitlements */,
 				4A8020441CEC677C000A55B7 /* AppDelegate.swift */,
 				4A8020481CEC677C000A55B7 /* Main.storyboard */,
+				4A43F7681D200A7000CE4DDE /* SettingTVC.swift */,
 				4A6144BB1CF3FDE000B6D6CB /* VideosTVC.swift */,
 				4A6144C91CF9A80D00B6D6CB /* DownloadsTVC.swift */,
 				4A6144C71CF8A3EB00B6D6CB /* Helper.swift */,
@@ -343,6 +346,7 @@
 				4A6144BC1CF3FDE000B6D6CB /* VideosTVC.swift in Sources */,
 				4A6144C81CF8A3EB00B6D6CB /* Helper.swift in Sources */,
 				4A6144D21CFA3C8F00B6D6CB /* Download.swift in Sources */,
+				4A43F7691D200A7000CE4DDE /* SettingTVC.swift in Sources */,
 				4A6144CF1CF9B2E300B6D6CB /* VideoCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
