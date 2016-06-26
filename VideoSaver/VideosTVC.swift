@@ -148,7 +148,7 @@ class VideosTVC: UITableViewController {
         let fileSizeText = NSByteCountFormatter.stringFromByteCount(Int64(video.fileSize.intValue), countStyle: .Binary)
         let addDateText = NSDateFormatter.localizedStringFromDate(video.createdDate, dateStyle: .ShortStyle, timeStyle: .ShortStyle)
         let duration = video.duration()
-        cell.detailTextLabel?.text = "\(fileSizeText)    \(NSLocalizedString("时长:", comment: "时长")): \(duration)    \(NSLocalizedString("日期", comment: "日期")): \(addDateText)"
+        cell.detailTextLabel?.text = "\(fileSizeText)    \(NSLocalizedString("时长", comment: "时长")): \(duration)    \(NSLocalizedString("日期", comment: "日期")): \(addDateText)"
         cell.imageView?.backgroundColor = UIColor.blackColor()
         cell.imageView?.image = nil
         
