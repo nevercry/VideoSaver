@@ -423,8 +423,11 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         // 去掉标题里面的换行符号
         var tmpTitle = videoInfo["title"] ?? "unknow"
         tmpTitle = tmpTitle.stringByReplacingOccurrencesOfString("\n", withString: "")
-        tmpTitle = tmpTitle.stringByTrimmingCharactersInSet(NSCharacterSet.newlineCharacterSet())
-        
+        tmpTitle = tmpTitle.componentsSeparatedByCharactersInSet(NSCharacterSet.newlineCharacterSet()).joinWithSeparator("-")
+        tmpTitle = tmpTitle.componentsSeparatedByCharactersInSet(NSCharacterSet.illegalCharacterSet()).joinWithSeparator("-")
+        tmpTitle = tmpTitle.componentsSeparatedByCharactersInSet(NSCharacterSet.controlCharacterSet()).joinWithSeparator("-")
+        tmpTitle = tmpTitle.componentsSeparatedByString(":").joinWithSeparator("-")
+        tmpTitle = tmpTitle.componentsSeparatedByString("/").joinWithSeparator("-")
         
         let fileName = tmpTitle
         
@@ -455,15 +458,15 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         }
         
         // 把文件的扩展名隐藏掉
-        do {
-            try tmpVideoUrl.setResourceValue(NSNumber.init(bool: true), forKey: NSURLHasHiddenExtensionKey)
-        } catch {
-            print("change extension hidden error")
-            let alertTitle = NSLocalizedString("修改文件失败", comment: "修改文件失败")
-            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
-            })
-            showAlert(alertTitle, message: nil, actions: [cancelAction])
-        }
+//        do {
+//            try tmpVideoUrl.setResourceValue(NSNumber.init(bool: true), forKey: NSURLHasHiddenExtensionKey)
+//        } catch {
+//            print("change extension hidden error")
+//            let alertTitle = NSLocalizedString("修改文件失败", comment: "修改文件失败")
+//            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
+//            })
+//            showAlert(alertTitle, message: nil, actions: [cancelAction])
+//        }
         
         // 检查是否需要保存到相册
         let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
