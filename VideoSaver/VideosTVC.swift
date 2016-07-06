@@ -223,7 +223,7 @@ class VideosTVC: UITableViewController {
             }
         }
         
-        let saveToAblumAction = UITableViewRowAction(style: .Normal, title: NSLocalizedString("保存", comment: "保存")) { (action, indexPath) in
+        let saveToAblumAction = UITableViewRowAction(style: .Normal, title: NSLocalizedString("存到照片", comment: "存到照片")) { (action, indexPath) in
             let video = self.videos[indexPath.row]
             
             let bool = UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((video.path))
@@ -329,7 +329,7 @@ extension VideosTVC {
         self.pinView?.stopAnimating()
         self.pinView?.removeFromSuperview()
         self.pinView = nil
-        var alTitle = NSLocalizedString("保存成功", comment: "保存成功")
+        var alTitle = NSLocalizedString("视频已保存到照片中", comment: "视频已保存到照片中")
         if (error != nil) {
             // 提示用户保存失败
             alTitle = NSLocalizedString("保存失败", comment: "保存失败")
