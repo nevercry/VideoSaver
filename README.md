@@ -15,13 +15,13 @@ VideoSaver的主要部件是它的extension。当安装到iPhone 、iPad后，�
 ###如何使用###
 用Safari打开视频网页，确认视频能够播放，点击Safari分享图标，使用插件下载。
 
-<img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUse_1.gif' width='640px'>
+<img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUse_1.gif' width='560px'>
 
 你可以选择直接下载视频，也可以点击右上角的 `存储` ，将视频链接保存到应用内以便稍后下载。
 
-<img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUser_2.gif' width='640px'>
+<img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUser_2.gif' width='560px'>
 
-当你在应用内下载收藏的视频，可以切换到其他应用，下载任务将在后台继续进行。**VideoSaver** 支持视频循环播放，iPad版支持画中画，多任务。
+当你在应用内下载收藏的视频，可以切换到其他应用，下载任务将在后台继续进行。VideoSaver支持视频循环播放，iPad版支持画中画，多任务。
 
 <img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverPiP.gif' width='750px'>
 
