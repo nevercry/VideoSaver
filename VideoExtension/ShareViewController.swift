@@ -9,6 +9,10 @@
 import UIKit
 import MobileCoreServices
 
+struct Constant {
+    // #### 替换为你的App Group ID ####
+    static let GroupID = "group.com.nevercry.videosaver"
+}
 
 class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionTaskDelegate, NSURLSessionDownloadDelegate{
     
@@ -226,7 +230,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     }
     
     func loadMarkList() -> [[String:String]]? {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+        let groupDefaults = NSUserDefaults.init(suiteName: Constant.GroupID)!
         
         if let jsonData:NSData = groupDefaults.objectForKey("downloadTaskList") as? NSData {
             do {
@@ -241,7 +245,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
     }
     
     func saveMark(mark:[String:String]) {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+        let groupDefaults = NSUserDefaults.init(suiteName: Constant.GroupID)!
         
         var markList = loadMarkList()
         
@@ -404,7 +408,7 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         
         // MARK: 下载视频
         let fileManager = NSFileManager.defaultManager()
-        let directory: NSURL = fileManager.containerURLForSecurityApplicationGroupIdentifier("group.com.nevercry.videosaver")!
+        let directory: NSURL = fileManager.containerURLForSecurityApplicationGroupIdentifier(Constant.GroupID)!
         let videosDir = directory.URLByAppendingPathComponent("Videos", isDirectory: true)
         
         if !fileManager.fileExistsAtPath(videosDir.path!) {
@@ -457,19 +461,8 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
             showAlert(alertTitle, message: nil, actions: [cancelAction])
         }
         
-        // 把文件的扩展名隐藏掉
-//        do {
-//            try tmpVideoUrl.setResourceValue(NSNumber.init(bool: true), forKey: NSURLHasHiddenExtensionKey)
-//        } catch {
-//            print("change extension hidden error")
-//            let alertTitle = NSLocalizedString("修改文件失败", comment: "修改文件失败")
-//            let cancelAction = UIAlertAction.init(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: { (action) in
-//            })
-//            showAlert(alertTitle, message: nil, actions: [cancelAction])
-//        }
-        
         // 检查是否需要保存到相册
-        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
+        let userDefault = NSUserDefaults(suiteName: Constant.GroupID)!
         
         if userDefault.objectForKey("isSaveToPhoteAblum") == nil {
             userDefault.setObject(NSNumber(bool: true), forKey: "isSaveToPhoteAblum")

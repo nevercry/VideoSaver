@@ -11,7 +11,7 @@ import UIKit
 class DownloadsTVC: UITableViewController {
     
     lazy var downloadsSession: NSURLSession = {
-        let configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier("group.com.nevercry.videosaver")
+        let configuration = NSURLSessionConfiguration.backgroundSessionConfigurationWithIdentifier(Constant.GroupID)
         let session = NSURLSession(configuration: configuration, delegate: self, delegateQueue: nil)
         return session
     }()
@@ -77,7 +77,7 @@ class DownloadsTVC: UITableViewController {
     
     // MARK: - 获取下载列表
     func loadTaskList() -> [[String:String]]? {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+        let groupDefaults = NSUserDefaults.init(suiteName: Constant.GroupID)!
         
         if let jsonData:NSData = groupDefaults.objectForKey("downloadTaskList") as? NSData {
             do {
@@ -92,7 +92,7 @@ class DownloadsTVC: UITableViewController {
     }
     
     func saveTask(task:[String:String]) {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+        let groupDefaults = NSUserDefaults.init(suiteName: Constant.GroupID)!
         
         var taskList = loadTaskList()
         
@@ -112,7 +112,7 @@ class DownloadsTVC: UITableViewController {
     }
     
     func saveTaskList() {
-        let groupDefaults = NSUserDefaults.init(suiteName: "group.com.nevercry.videosaver")!
+        let groupDefaults = NSUserDefaults.init(suiteName: Constant.GroupID)!
         var arr = Array<[String:String]>()
         for item in downloadTasks {
             let dic = ["title":item.title,"url":item.url,"poster":item.poster,"duration":item.duration]
@@ -258,7 +258,7 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
     
     func URLSession(session: NSURLSession, downloadTask: NSURLSessionDownloadTask, didFinishDownloadingToURL location: NSURL) {
         let fileManager = NSFileManager.defaultManager()
-        let directory: NSURL = fileManager.containerURLForSecurityApplicationGroupIdentifier("group.com.nevercry.videosaver")!
+        let directory: NSURL = fileManager.containerURLForSecurityApplicationGroupIdentifier(Constant.GroupID)!
         let videosDir = directory.URLByAppendingPathComponent("Videos", isDirectory: true)
         
         if !fileManager.fileExistsAtPath(videosDir.path!) {
@@ -328,7 +328,7 @@ extension DownloadsTVC: NSURLSessionDownloadDelegate {
         
         
         // 检查是否需要保存到相册
-        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
+        let userDefault = NSUserDefaults(suiteName: Constant.GroupID)!
         
         
         

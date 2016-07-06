@@ -14,7 +14,7 @@ class SettingTVC: UITableViewController {
 
     @IBAction func switchToggle(sender: UISwitch) {
         
-        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
+        let userDefault = NSUserDefaults(suiteName: Constant.GroupID)!
         userDefault.setObject(NSNumber(bool: sender.on), forKey: "isSaveToPhoteAblum")
         
         if userDefault.synchronize() {
@@ -30,7 +30,7 @@ class SettingTVC: UITableViewController {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: #selector(done))
         
         // 检查是否需要保存到相册
-        let userDefault = NSUserDefaults(suiteName: "group.com.nevercry.videosaver")!
+        let userDefault = NSUserDefaults(suiteName: Constant.GroupID)!
         
         if userDefault.objectForKey("isSaveToPhoteAblum") == nil {
             print("no savetophote key")

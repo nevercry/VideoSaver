@@ -12,11 +12,6 @@ import AVFoundation
 
 class VideosTVC: UITableViewController {
     
-    // MARK: Constents
-    struct Constents {
-        static let VideoCellIdentifier = "Video Cell"
-    }
-    
     // MARK: - 数据源
     var videos: [Video] = []
     let fileManager = NSFileManager.defaultManager()
@@ -93,7 +88,7 @@ class VideosTVC: UITableViewController {
         
         let cancelAction = UIAlertAction.init(title: "取消", style: .Cancel, handler: nil)
         let clearAction = UIAlertAction.init(title: "清空", style: .Destructive) { (action) in
-            let groupDir = self.fileManager.containerURLForSecurityApplicationGroupIdentifier("group.com.nevercry.videosaver")!
+            let groupDir = self.fileManager.containerURLForSecurityApplicationGroupIdentifier(Constant.GroupID)!
             let videosDir = groupDir.URLByAppendingPathComponent("Videos", isDirectory: true)
             if self.fileManager.fileExistsAtPath(videosDir.path!) {
                 do {
@@ -117,7 +112,7 @@ class VideosTVC: UITableViewController {
     
     // MARK: - 获取缓存文件中的视频信息
     func loadVideosInfo() {
-        let groupDirURL = fileManager.containerURLForSecurityApplicationGroupIdentifier("group.com.nevercry.videosaver")!
+        let groupDirURL = fileManager.containerURLForSecurityApplicationGroupIdentifier(Constant.GroupID)!
         print("group url is \(groupDirURL)")
         let videosDir = groupDirURL.URLByAppendingPathComponent("Videos", isDirectory: true)
         // 检查文件夹是否存在
@@ -166,7 +161,7 @@ class VideosTVC: UITableViewController {
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(Constents.VideoCellIdentifier, forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier(Constant.VideoCellIdentifier, forIndexPath: indexPath)
 
         // Configure the cell...
         var video = videos[indexPath.row]

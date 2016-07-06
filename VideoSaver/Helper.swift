@@ -8,6 +8,13 @@
 
 import UIKit
 
+struct Constant {
+    // #### 替换为你的App Group ID ####
+    static let GroupID = "group.com.nevercry.videosaver"
+    static let VideoCellIdentifier = "Video Cell"
+}
+
+
 
 extension UIImage {
     // MARK: - 根据宽高比截取图片中心并压缩
