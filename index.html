@@ -13,26 +13,82 @@
     <section class="page-header">
       <h1 class="project-name">VideoSaver</h1>
       <h2 class="project-tagline">iOS,download,mp4,safari-extension</h2>
-      <a href="https://github.com/nevercry/VideoSaver/tree/videoMarks" class="btn">View on GitHub</a>
-      <a href="https://itunes.apple.com/us/app/videomarks/id1123317863" class="btn">App Store</a> (No Download Feature)
+      <a href="https://github.com/nevercry/VideoSaver" class="btn">View on GitHub</a>
+      <a href="https://github.com/nevercry/VideoSaver/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/nevercry/VideoSaver/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
-      <h3>
-<a id="welcome-to-videosaver" class="anchor" href="#welcome-to-videosaver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to VideoSaver.</h3>
+      <h1>
+<a id="videosaver" class="anchor" href="#videosaver" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>VideoSaver</h1>
 
-<p>VideoSaver is an iOS app that can download 'mp4' format video directly from Safari share extension, or you can save the link of video to the host app and download it later. The app contains custom player that can loop video, which is really useful for playing short video (like GIF). It supports background download, save video in both app cache folder and user's Photo Library. </p>
-<p>App Store Version Demo:<p>
-<p><iframe src="https://player.vimeo.com/video/171967131?title=0&byline=0&portrait=0" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></p>
+<p>在iPhone上看到一段有趣的视频，想要把它下载到照片里收藏，是件麻烦的事。iOS不支持文件下载，而视频网站为了保护自己的内容，只在自己的App里提供缓存功能。所以我开发了VideoSaver，一个简单易用的Safari视频下载插件。</p>
+
+<p>它的原理很简单：当Safari载入网页后，插件可以运行自定义的JS，这样我们就可以获得网页中的视频地址，轻松下载到想要保存的地方。</p>
+
+<p>VideoSaver已在Github开源，你可以通过Mac下载，用Xcode编译到你自己的iPhone、iPad上。<code>注：由于 VideoSaver在数据传输上利用了AppGroup技术，免费的开发者账号将无法使用</code> 请在编译时创建并替换为你的App Group ID。</p>
+
+<p>VideoSaver is a simple tool for Safari to download mp4 video on iOS devices. It provides a safari action extension, when the video webpage has loaded, it can run some custom js to fetch the mp4 video link, then you can download the video file either in VideoSaver or in Photos. </p>
+
+<p>Now VideoSaver is open source on Github. You can build it using your Mac with Xcode to your iPhone and iPad. It requires your have Paid Developer Account to run it, because you need to create your own App Group ID which is not available for free one.</p>
+
+<h3>
+<a id="extension" class="anchor" href="#extension" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Extension</h3>
+
+<p>VideoSaver的主要部件是它的extension。当安装到iPhone 、iPad后，请先在Safari的插件管理中打开插件。</p>
+
+<p>The most important component of VideoSaver is the Safari extension. When your install the app to the iPhone,iPad make sure you enable the app's extension in Safari.</p>
+
+<p><img src="https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverExtension.gif" width="480px"></p>
+
+<p>在项目的 <code>VideoExtension</code> 目录下，有个名为 <code>MyJSFile.js</code> 的文件，插件通过它来操作当前网页的DOM。你可以在此对特定的视频网站做自定义解析，可以利用Mac上的Safari Web Inspector 查看iPhone上的网页源码进行调试。具体方式和工具可以参考：<a href="https://developer.apple.com/videos/play/wwdc2014/512/">WWDC 2014 Session 512</a> 。</p>
+
+<p>There is a file named <code>MyJSFile.js</code> in the directory <code>VideoExtension</code> of the project, you can actually customize it to manipulate the webpage DOM. You can write your custom parse logic code for the specific video site. Use the Safari Web Inspector on your Mac, to lookup the source code of your iPhone webpage, and to do whatever your want. More detail: <a href="https://developer.apple.com/videos/play/wwdc2014/512/">WWDC 2014 Session 512</a>.</p>
+
+<h3>
+<a id="如何使用--how-to-use" class="anchor" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8--how-to-use" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>如何使用  How To Use</h3>
+
+<p>用Safari打开视频网页，确认视频能够播放，点击Safari分享图标，使用插件下载。</p>
+
+<p>Use Safari open the video webpage, make sure the video can play. Tap the Safari action icon, use the app's extension to download.</p>
+
+<p><img src="https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUse_1.gif" width="560px"></p>
+
+<p>你可以选择直接下载视频，也可以点击右上角的 <code>存储</code> ，将视频链接保存到应用内以便稍后下载。</p>
+
+<p>You can decide to download directly, or just save the link to the app for later downloading.</p>
+
+<p><img src="https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverHowToUser_2.gif" width="560px"></p>
+
+<p>当你在应用内下载收藏的视频，可以切换到其他应用，下载任务将在后台继续进行。VideoSaver支持视频循环播放，iPad版支持画中画，多任务。</p>
+
+<p>When you decide to download video later in the app, you can switch to other apps, the downloading tasks will continue in the background. VideoSaver support playing video on loop, the iPad version support Picture in Picture, multitasking.</p>
+
+<p><img src="https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverPiP.gif" width="750px"></p>
+
+<p>原生支持的视频网站有<em>Youtube、 Gfycat、Imgur、哔哩哔哩、秒拍</em>等等，大部分提供<strong>mp4</strong>视频的网页都可以解析到视频地址。 </p>
+
+<p>Support mp4 video download sites included: Youtube,Gfycat,Imgur,bilibili,miaopai,etc.. </p>
+
+<h3>
+<a id="videomarks-影签" class="anchor" href="#videomarks-%E5%BD%B1%E7%AD%BE" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>VideoMarks 影签</h3>
+
+<p>由于版权问题VideoSaver无法上架App Store，我去掉了VideoSaver的下载功能，只提供视频网址解析与收藏的服务，改名为 VideoMarks（影签）现已上架。你可以搭配强大的Workflow，完成下载的需求。当然VideoMarks也可以作为你的视频书签，记录你感兴趣的视频网址。</p>
+
+<p>For piracy reason, VideoSaver could't be downloaded from App Store. So I removed the download feature of it, and rename the App Store Version as VideoMarks, you could extend it's ability with the powerful of Workflow. You can just use it as the video bookmark app.</p>
+
+<p><a href="https://itunes.apple.com/cn/app/videomarks/id1123317863?l=en&amp;mt=8"><img src="https://devimages.apple.com.edgekey.net/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" alt=""></a></p>
+
 <h3>
 <a id="authors" class="anchor" href="#authors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors</h3>
 
 <p>Yang Shengfu (<a href="https://github.com/nevercry" class="user-mention">@nevercry</a>)</p>
 
 <h3>
-<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support or Contact</h3>
+<a id="support-or-contact--联系方式" class="anchor" href="#support-or-contact--%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support or Contact  联系方式</h3>
 
-<p>Having trouble with VideoSaver?<br>
+<p>Having trouble with VideoSaver? Feel free to contact me.
+任何问题都可以联系我。
 Email: nsysfmac#gmail.com<br>
 Twitter: <a href="https://twitter.com/nevercry">nevercry</a></p>
 
