@@ -28,6 +28,6 @@
 原生支持的视频网站有`Youtube`、 `Gfycat`、`Imgur`、`哔哩哔哩`、`秒拍`等等，大部分提供`mp4`视频的网页都可以解析到视频地址。 
 
 ###VideoMarks###
-由于版权问题 **VideoSaver** 无法上架App Store，我去掉了VideoSaver的下载功能，只提供视频网址解析与收藏的服务，改名为**VideoMarks**（**影签**）现已上架。你可以搭配强大的Workflow，完成下载的需求。当然**VideoMarks**也可以作为你的视频书签，记录你感兴趣的视频网址。
+由于版权问题 **VideoSaver** 无法上架App Store，我去掉了 **VideoSaver** 的下载功能，只提供视频网址解析与收藏的服务，改名为 **VideoMarks**（**影签**）现已上架。你可以搭配强大的Workflow，完成下载的需求。当然 **VideoMarks** 也可以作为你的视频书签，记录你感兴趣的视频网址。
 
 <a href='https://itunes.apple.com/cn/app/videomarks/id1123317863?l=en&mt=8'><img src="https://devimages.apple.com.edgekey.net/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" alt=""></a>
