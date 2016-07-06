@@ -5,8 +5,8 @@
 
 VideoSaver已在Github开源，你可以通过Mac下载，用Xcode编译到你自己的iPhone、iPad上。`注：由于 VideoSaver在数据传输上利用了AppGroup技术，免费的开发者账号将无法使用` 请在编译时创建并替换为你的App Group ID。
 
-###Extension###
-VideoSaver的主要部件是它的extension。当安装到iPhone 、iPad后，请先在Safari的插件管理中打开插件。
+###插件###
+VideoSaver的主要功能在于它的插件。当安装到iPhone 、iPad后，请先在Safari的插件管理中打开VideoSaver。
 
 <img src='https://github.com/nevercry/VideoSaver/blob/gh-pages/images/videoSaverExtension.gif' width='480px'>
 
@@ -28,6 +28,61 @@ VideoSaver的主要部件是它的extension。当安装到iPhone 、iPad后，�
 原生支持的视频网站有*Youtube、 Gfycat、Imgur、哔哩哔哩、秒拍*等等，大部分提供**mp4**视频的网页都可以解析到视频地址。 
 
 ###VideoMarks###
-由于版权问题VideoSaver无法上架App Store，我去掉了VideoSaver的下载功能，只提供视频网址解析与收藏的服务，改名为 VideoMarks（影签）现已上架。你可以搭配强大的Workflow，完成下载的需求。当然VideoMarks也可以作为你的视频书签，记录你感兴趣的视频网址。
 
 <a href='https://itunes.apple.com/cn/app/videomarks/id1123317863?l=en&mt=8'><img src="https://devimages.apple.com.edgekey.net/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" alt=""></a>
+
+由于版权问题VideoSaver无法上架App Store，我去掉了VideoSaver的下载功能，只提供视频网址解析与收藏的服务，改名为 VideoMarks（影签）现已上架。你可以搭配强大的Workflow，完成下载的需求。当然VideoMarks也可以作为你的视频书签，记录你感兴趣的视频网址。
+
+
+
+
+
+
+
+
+
+
+
+##English:
+
+VideoSaver is a simple tool for Safari to download mp4 video on iOS devices. It provides a safari action extension, when the video webpage has loaded, it can run some custom js to fetch the mp4 video link, then you can download the video file either in VideoSaver or in Photos.
+
+Now VideoSaver is open source on Github. You can build it using your Mac with Xcode to your iPhone and iPad. It requires your have Paid Developer Account to run it, because you need to create your own App Group ID which is not available for free one.
+
+###Extension
+
+The most important component of VideoSaver is the Safari extension. When your install the app to the iPhone,iPad make sure you enable the app's extension in Safari.
+
+There is a file named `MyJSFile.js` in the directory `VideoExtension` of the project, you can actually customize it to manipulate the webpage DOM. You can write your custom parse logic code for the specific video site. Use the Safari Web Inspector on your Mac, to lookup the source code of your iPhone webpage, and to do whatever your want. More detail: [WWDC 2014 Session 512](https://developer.apple.com/videos/play/wwdc2014/512/)
+
+###How To Use
+
+Use Safari to open the video webpage, make sure the video can play. Tap the Safari action icon, use the app's extension to download.
+
+You can download video directly, or just save the link to the app for later downloading.
+
+When you download video later in the app, you can switch to other apps, the downloading tasks will continue in the background. VideoSaver supports playing video on loop, the iPad version supports Picture in Picture, multitasking.
+
+Support video download sites included: Youtube,Gfycat,Imgur,bilibili,miaopai,etc..
+
+###VideoMarks 
+
+<a href='https://itunes.apple.com/cn/app/videomarks/id1123317863?l=en&mt=8'><img src="https://devimages.apple.com.edgekey.net/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg" alt=""></a>
+
+For piracy reason, VideoSaver could't be downloaded from App Store. So I removed the download feature of it, and rename the App Store Version as VideoMarks, you could extend it's ability with the powerful of Workflow. Maybe use it as the video bookmark app.
+
+###Authors
+
+Yang Shengfu (@nevercry)
+
+###Support or Contact 
+
+Having trouble with VideoSaver? Feel free to contact me.  
+
+Email: nsysfmac#gmail.com
+
+Twitter: nevercry
+
+
+
+
