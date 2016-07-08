@@ -157,7 +157,8 @@ run: function(arguments) {
                 // vine
                 videoInfo.duration = "0:06";
             } else {
-                videoInfo["duration"] = document.querySelector("div[data-testid=UserCell]").nextSibling.nextSibling.textContent;
+                var duration_seconds = document.getElementsByTagName('video')[0].duration;
+                videoInfo.duration = seconds2time(duration_seconds);
             }
             
             var videoTitle = document.querySelector("div[data-testid=UserCell]").nextSibling.textContent;
