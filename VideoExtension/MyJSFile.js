@@ -161,10 +161,11 @@ run: function(arguments) {
                 videoInfo.duration = seconds2time(duration_seconds);
             }
             
-            var videoTitle = document.querySelector("div[data-testid=UserCell]").nextSibling.textContent;
-            if (videoTitle.length > 0) {
-                videoInfo.title = videoTitle
-            }
+            var vUrl = new URL(elem.src);
+            var vPath = vUrl.pathname.slice(1,-4);
+            var vComps = vPath.split('/');
+            var lastCom = vComps.pop();
+            videoInfo.title = lastCom;
         }
         videoInfo.poster = document.getElementsByTagName('video')[0].poster;
         videoInfo.url = elem.src;
