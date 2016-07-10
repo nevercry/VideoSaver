@@ -40,6 +40,34 @@ run: function(arguments) {
         return time;
     }
     
+    // URL Last component
+    function urlLastComponent(url) {
+        var tUrl = new URL(url);
+        var tComps = tUrl.pathname.split('/');
+        var lastComp = tComps.pop();
+        return lastComp.slice(0,-4);
+    }
+    
+    // 判断元素是否在viewport中
+    function isElementInViewport (el) {
+        
+        //special bonus for those using jQuery
+        if (typeof jQuery === "function" && el instanceof jQuery) {
+            el = el[0];
+        }
+        
+        var rect = el.getBoundingClientRect();
+        
+        return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth) ||/*or $(window).width() */
+                rect.top < (window.innerHeight/2 || document.documentElement.clientHeight/2) &&
+                rect.bottom > (window.innerHeight/2 || document.documentElement.clientHeight/2)
+                );
+    }
+    
     // 解析Youtube
     function youtubeParse() {
         // youtube
@@ -94,8 +122,8 @@ run: function(arguments) {
                 break;
             }
         }
-        var vUrl = new URL(elem.src);
-        videoInfo.title = vUrl.pathname.slice(1,-4);
+        
+        videoInfo.title = urlLastComponent(elem.src);
         videoInfo.url = elem.src;
         videoInfo.poster = elem.parentNode.poster;
         
@@ -161,11 +189,7 @@ run: function(arguments) {
                 videoInfo.duration = seconds2time(duration_seconds);
             }
             
-            var vUrl = new URL(elem.src);
-            var vPath = vUrl.pathname.slice(1,-4);
-            var vComps = vPath.split('/');
-            var lastCom = vComps.pop();
-            videoInfo.title = lastCom;
+            videoInfo.title = urlLastComponent(elem.src);
         }
         videoInfo.poster = document.getElementsByTagName('video')[0].poster;
         videoInfo.url = elem.src;
@@ -240,6 +264,29 @@ run: function(arguments) {
         }
     }
     
+    // tumblr
+    function tumblrParse() {
+        otherParse();
+        if (videoInfo.url.length == 0) {
+            // 获取iframe
+            var vFrames = document.getElementsByClassName('tumblr_video_iframe');
+            var vFrame;
+            for (var i = 0; i < vFrames.length; i++) {
+                var f = vFrames[i];
+                if (isElementInViewport(f)) {
+                    vFrame = f;
+                    break;
+                }
+            }
+            
+            if (vFrame) {
+                videoInfo.title = "iframe";
+                videoInfo.url = vFrame.src;
+                videoInfo.type = "iframe";
+            }
+        }
+    }
+    
     function otherParse() {
         // 其他网站
         var sources = document.getElementsByTagName("source");
@@ -280,10 +327,7 @@ run: function(arguments) {
             }
             
             if (videoInfo.url) {
-                var vUrl = new URL(videoInfo.url);
-                var urlComponents = vUrl.pathname.split('/');
-                var lastComponent = urlComponents.pop();
-                videoInfo.title = lastComponent.slice(1,-4);
+                videoInfo.title = urlLastComponent(videoInfo.url);
             }
         }
     }
@@ -306,6 +350,8 @@ run: function(arguments) {
         miaopaiParse();
     } else if (originURL.includes('.weibo.')) {
         weiboParse();
+    } else if (originURL.includes('tumblr.com')) {
+        tumblrParse();
     } else {
         otherParse();
     }

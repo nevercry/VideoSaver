@@ -127,6 +127,9 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         } else if (videoInfo["type"] == "xml") {
             // 是否为twimg的xml文件
             parseXML()
+        } else if (videoInfo["type"] == "iframe") {
+            // 解析tumblr的iframe
+            parse_iframe(userAction)
         } else {
             startSave()
         }
@@ -281,9 +284,91 @@ class ShareViewController: UIViewController, NSURLSessionDelegate, NSURLSessionT
         // 解析一下是否是优酷的m3u8 文件
         if (videoInfo["type"] == "m3u8") {
             parse_m3u8(userAction)
+        } else if (videoInfo["type"] == "xml") {
+            // 是否为twimg的xml文件
+            parseXML()
+        } else if (videoInfo["type"] == "iframe") {
+            // 解析tumblr的iframe
+            parse_iframe(userAction)
         } else {
             startDonload()
         }
+
+    }
+    
+    // MARK: - 解析iframe
+    func parse_iframe(action: ShareActions) {
+        pinView.startAnimating()
+        
+        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+        config.timeoutIntervalForRequest = 10
+        let session = NSURLSession(configuration: config)
+        let videoURL = NSURL(string: videoInfo["url"]!)
+        session.dataTaskWithRequest(NSURLRequest(URL: videoURL!), completionHandler: { (data, res, error) in
+            self.isDownLoading = false
+            
+            guard (data != nil) else {
+                let alertTitle = NSLocalizedString("Operation Failed", comment: "操作失败")
+                let message = NSLocalizedString("Try again", comment: "请重试")
+                let cancelAction = UIAlertAction.init(title: NSLocalizedString("OK", comment: "确认"), style: .Cancel, handler: {
+                    action in
+                    self.hideExtensionWithCompletionHandler()
+                })
+                self.showAlert(alertTitle, message: message, actions: [cancelAction])
+                return
+            }
+            
+            let dataInfo = String(data: data!, encoding: NSUTF8StringEncoding)
+            let scaner = NSScanner(string: dataInfo!)
+            scaner.scanUpToString("poster=", intoString: nil)
+            scaner.scanUpToString("http", intoString: nil)
+            var poster: NSString?
+            scaner.scanUpToString(" ", intoString: &poster)
+            
+            scaner.scanUpToString("duration", intoString: nil)
+            var durationDic: NSString?
+            scaner.scanUpToString(",", intoString: &durationDic)
+            var duration = durationDic?.componentsSeparatedByString(":").last
+            
+            scaner.scanUpToString("source src=", intoString: nil)
+            scaner.scanUpToString("http", intoString: nil)
+            var vURL:NSString?
+            scaner.scanUpToString(" ", intoString: &vURL)
+            
+            //                print("dateinfo: \(dataInfo)")
+            print("poster: \(poster)")
+            print("videoURL: \(vURL)")
+            print("duration: \(duration)")
+            
+            guard vURL != nil && poster != nil && duration != nil else {
+                let cancelAction = UIAlertAction(title: NSLocalizedString("确认", comment: "确认"), style: .Cancel, handler: nil)
+                self.showAlert(NSLocalizedString("地址解析失败", comment: "地址解析失败"), message: nil, actions: [cancelAction])
+                return
+            }
+            
+            // 去掉最后一位 \" \'
+            vURL = vURL!.substringToIndex(vURL!.length - 1)
+            poster = poster!.substringToIndex(poster!.length - 1)
+            duration = self.seconds2time(Int(duration!)!)
+            
+            
+            let comps = vURL!.componentsSeparatedByString("/")
+            let lastCom = comps.last
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.videoInfo["url"] = vURL! as String
+                self.videoInfo["poster"] = poster! as String
+                self.videoInfo["duration"] = duration! as String
+                self.videoInfo["title"] = lastCom
+                self.linkLabel.text = "\(NSLocalizedString("Link", comment: "链接")): \(vURL!)";
+                switch action {
+                case .Download:
+                    self.startDonload()
+                case .Save:
+                    self.startSave()
+                }
+            })
+        }).resume()
     }
     
     func startDonload() {
@@ -541,5 +626,30 @@ extension ShareViewController: NSXMLParserDelegate {
                 }
             })
         }
+    }
+}
+
+extension ShareViewController {
+    func seconds2time(sec: Int) -> String {
+        var seconds = sec
+        let hours   = seconds / 3600
+        let minutes = (seconds - (hours * 3600)) / 60;
+        seconds = seconds - (hours * 3600) - (minutes * 60);
+        var druation = ""
+        
+        if (hours != 0) {
+            druation = "\(hours)"+":";
+        }
+        if (minutes != 0 || druation != "") {
+            let minutesStr = (minutes < 10 && druation != "") ? "0"+"\(minutes)" : String(minutes);
+            druation += minutesStr+":";
+        }
+        if (druation == "") {
+            druation = (seconds < 10) ? "0:0"+"\(seconds)" : "0:"+String(seconds);
+        }
+        else {
+            druation += (seconds < 10) ? "0"+"\(seconds)" : String(seconds);
+        }
+        return druation;
     }
 }
